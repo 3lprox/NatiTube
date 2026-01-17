@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NatiTube — Native Player Experience</title>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --md-surface: #fdfbff;
+            --md-on-surface: #1a1c1e;
+            --md-primary: #0061a4;
+            --md-on-primary: #ffffff;
+            --md-surface-variant: #dfe2eb;
+            --md-on-surface-variant: #43474e;
+            --md-secondary-container: #d1e4ff;
+            --md-on-secondary-container: #001d36;
+            --md-outline: #73777f;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--md-surface);
+            color: var(--md-on-surface);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .header {
+            padding: 80px 24px 56px;
+            text-align: center;
+        }
+
+        h1 {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 400;
+            margin: 0;
+            color: var(--md-primary);
+            letter-spacing: -0.5px;
+        }
+
+        .tagline {
+            font-size: 1.25rem;
+            margin-top: 16px;
+            color: var(--md-on-surface-variant);
+            font-weight: 400;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 64px;
+        }
+
+        .feature-card {
+            background-color: var(--md-secondary-container);
+            color: var(--md-on-secondary-container);
+            padding: 32px;
+            border-radius: 28px;
+        }
+
+        .feature-card h3 {
+            margin: 0 0 12px 0;
+            font-family: 'Google Sans', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 500;
+        }
+
+        .feature-card p {
+            margin: 0;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .content-section {
+            background-color: var(--md-surface-variant);
+            border-radius: 28px;
+            padding: 48px;
+            margin-top: 24px;
+        }
+
+        .content-section h2 {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 2rem;
+            margin-top: 0;
+            margin-bottom: 24px;
+            color: var(--md-on-surface);
+        }
+
+        .platform-info {
+            margin-bottom: 40px;
+        }
+
+        .platform-info h4 {
+            margin: 0 0 8px 0;
+            font-size: 1.2rem;
+            font-family: 'Google Sans', sans-serif;
+            color: var(--md-primary);
+        }
+
+        .platform-info p {
+            margin: 0;
+            color: var(--md-on-surface-variant);
+            line-height: 1.5;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            background-color: var(--md-primary);
+            color: var(--md-on-primary);
+            padding: 14px 32px;
+            border-radius: 100px;
+            text-decoration: none;
+            font-family: 'Google Sans', sans-serif;
+            font-weight: 500;
+            margin-top: 32px;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        footer {
+            text-align: center;
+            padding: 80px 24px;
+            font-size: 0.9rem;
+            color: var(--md-on-surface-variant);
+            border-top: 1px solid var(--md-surface-variant);
+        }
+
+        code {
+            font-family: monospace;
+            background: rgba(0,0,0,0.06);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <h1>NatiTube</h1>
+        <p class="tagline">Native player integration for the YouTube mobile web.</p>
+        <a href="https://github.com/3lprox/NatiTube" class="btn">Get Started on GitHub</a>
+    </header>
+
+    <div class="container">
+        <div class="features">
+            <div class="feature-card">
+                <h3>Native Controls</h3>
+                <p>Leverage your system's default volume, brightness, and playback gestures seamlessly.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Picture-in-Picture</h3>
+                <p>Enable true OS-level floating windows for multitasking without app-imposed limits.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Minimalist Design</h3>
+                <p>Bypass proprietary web overlays for a cleaner, faster, and more responsive viewing experience.</p>
+            </div>
+        </div>
+
+        <section class="content-section">
+            <h2>Implementation</h2>
+            
+            <div class="platform-info">
+                <h4>Android Integration</h4>
+                <p>Utilize the <code>android-version.js</code> script with mobile injectors like InjecThor or Kiwi. It targets the mobile web DOM to isolate the video stream into the system controller.</p>
+            </div>
+
+            <div class="platform-info">
+                <h4>iOS Solution</h4>
+                <p>Access the dedicated Apple Shortcut via <code>iOS-url</code>. It allows for direct Safari integration through the native share sheet, triggering the iOS media controller.</p>
+            </div>
+
+            <div class="platform-info">
+                <h4>Experimental Channel</h4>
+                <p>The <code>beta-version</code> directory contains early-access builds with experimental layout adjustments and advanced DOM manipulation techniques.</p>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>NatiTube is an open-source project hosted on GitHub.<br>Designed to return media control to the user.</p>
+    </footer>
+
+</body>
+</html>
