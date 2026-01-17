@@ -83,6 +83,42 @@
             border-radius: 24px;
         }
 
+        /* NEW: Developer Ecosystem Styles */
+        .dev-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .dev-card {
+            background-color: var(--md-surface);
+            border: 1px solid var(--md-surface-variant);
+            border-radius: 24px;
+            padding: 24px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .dev-card:hover {
+            background-color: var(--md-secondary-container);
+            transform: translateY(-4px);
+            border-color: var(--md-primary);
+        }
+
+        .dev-card h4 {
+            font-family: 'Google Sans', sans-serif;
+            margin: 0 0 8px 0;
+            color: var(--md-primary);
+        }
+
+        .dev-card p {
+            font-size: 0.9rem;
+            margin: 0;
+            opacity: 0.8;
+        }
+
         .comparison-table {
             width: 100%;
             border-collapse: collapse;
@@ -106,13 +142,6 @@
             font-weight: 500;
         }
 
-        code {
-            font-family: monospace;
-            background: rgba(0,0,0,0.08);
-            padding: 3px 6px;
-            border-radius: 6px;
-        }
-
         .warning-box {
             background-color: var(--md-tertiary-container);
             color: var(--md-on-tertiary-container);
@@ -134,10 +163,6 @@
             transition: transform 0.2s;
         }
 
-        .btn-github:hover {
-            transform: translateY(-2px);
-        }
-
         footer {
             text-align: center;
             padding: 80px 24px;
@@ -157,30 +182,40 @@
 
     <section id="about">
         <h2>Overview</h2>
-        <p>NatiTube is a code-injection project designed to bypass the limitations of the YouTube mobile web player. It isolates the HTML5 video stream and delivers it directly to the operating system's native media controller (AVPlayer for iOS and MediaPlayer for Android).</p>
+        <p>NatiTube is a code-injection project designed to bypass the limitations of the YouTube mobile web player. It isolates the HTML5 video stream and delivers it directly to the operating system's native media controller.</p>
         
         <div class="feature-grid">
             <div class="feature-item">
                 <h3>True Multitasking</h3>
-                <p>By using the native system player, Picture-in-Picture mode integrates perfectly with your mobile OS window manager, allowing you to use other apps without playback interruption.</p>
+                <p>By using the native system player, Picture-in-Picture mode integrates perfectly with your mobile OS window manager.</p>
             </div>
             <div class="feature-item">
                 <h3>System Integration</h3>
-                <p>Native controls provide access to system-level gestures for volume, brightness, and AirPlay/Cast features that are often restricted in web browsers.</p>
+                <p>Native controls provide access to system-level gestures for volume, brightness, and AirPlay/Cast features.</p>
             </div>
+        </div>
+    </section>
+
+    <section id="ecosystem">
+        <h2>Developer Ecosystem</h2>
+        <p>Explore experimental builds or contribute to the project through our community-driven modules.</p>
+        
+        <div class="dev-grid">
+            <a href="https://github.com/3lprox/NatiTube/blob/main/README.md#natitube-beta" class="dev-card">
+                <h4>NatiTube Beta</h4>
+                <p>Test the latest experimental scripts for Android and iOS before they reach the main branch.</p>
+            </a>
+            <a href="https://github.com/3lprox/NatiTube/blob/main/Plugins.txt" class="dev-card">
+                <h4>Plugins Repository</h4>
+                <p>View community-submitted code snippets or submit your own functional improvements.</p>
+            </a>
         </div>
     </section>
 
     <section id="technical">
         <h2>How It Works</h2>
-        <p>The core logic utilizes a DOM observation loop that monitors <code>m.youtube.com</code> for the <code>&lt;video&gt;</code> element. Once active, the script performs three critical operations:</p>
-        <ul>
-            <li><strong>DOM Re-parenting:</strong> Moves the video element to the top of the document hierarchy to prevent YouTube's scripts from overriding its state.</li>
-            <li><strong>Control Enforcement:</strong> Triggers the <code>controls = true</code> attribute, forcing the browser to render the native OS UI instead of the custom YouTube overlay.</li>
-            <li><strong>CSS Dominance:</strong> Applies high-priority styling to ensure the player maintains the correct aspect ratio and visibility above all other web elements.</li>
-        </ul>
-
-        <h3>Performance Comparison</h3>
+        <p>The core logic utilizes a DOM observation loop that monitors <code>m.youtube.com</code> for the <code>&lt;video&gt;</code> element.</p>
+        
         <table class="comparison-table">
             <thead>
                 <tr>
@@ -205,43 +240,29 @@
                     <td>Blocked by Web Interface</td>
                     <td>OS Controlled</td>
                 </tr>
-                <tr>
-                    <td>Interface Overhead</td>
-                    <td>High (Heavy JS/DOM)</td>
-                    <td>Minimal (Native)</td>
-                </tr>
             </tbody>
         </table>
     </section>
 
     <section id="installation">
         <h2>Installation Guide</h2>
-        
         <div class="info-card">
             <h3>Android Setup</h3>
             <p>1. Install a UserScript manager (Kiwi Browser, Orion, or InjecThor).</p>
-            <p>2. Load the <code>android-version.js</code> script from the repository.</p>
-            <p>3. Ensure the target URL is set to <code>*://m.youtube.com/*</code>.</p>
+            <p>2. Load the <code>natitube-android.user.js</code> script from the repository.</p>
         </div>
 
         <div class="info-card">
             <h3>iOS Setup</h3>
-            <p>1. Access the official Shortcut link via the <code>iOS-url</code> file.</p>
-            <p>2. Enable "Allow Untrusted Shortcuts" in your device settings if required.</p>
-            <p>3. Execute the shortcut from the Safari Share Sheet while on a YouTube page.</p>
+            <p>1. Access the official Shortcut link via the repository.</p>
+            <p>2. Execute the shortcut from the Safari Share Sheet while on a YouTube page.</p>
         </div>
     </section>
 
     <section id="faq">
-        <h2>Frequently Asked Questions</h2>
-        <h3>Why is the video quality low?</h3>
-        <p>YouTube uses adaptive bitrate streaming (DASH). When switching to the native player, the browser may default to a lower resolution stream. It is recommended to manually select your desired quality in the YouTube settings before activating the script.</p>
-        
-        <h3>Does it work with the YouTube App?</h3>
-        <p>No. NatiTube is a web-based injection tool designed specifically for mobile browsers. It relies on the browser's ability to render native HTML5 video controls.</p>
-
+        <h2>FAQ</h2>
         <div class="warning-box">
-            <strong>Privacy Note:</strong> NatiTube does not collect data, connect to external servers, or track your history. The code is 100% open-source and executes locally on your hardware.
+            <strong>Privacy Note:</strong> NatiTube does not collect data or track history. The code is 100% open-source and executes locally.
         </div>
     </section>
 
