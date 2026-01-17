@@ -1,0 +1,78 @@
+
+
+PiP for android (iOS is including PiP)
+
+
+// ==UserScript==
+// @name         NatiTube Android - Native PiP & Player
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @description  Forzar el modo Picture-in-Picture y el uso del reproductor nativo en YouTube móvil.
+// @author       3lprox
+// @match        https://m.youtube.com/*
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=youtube.com
+// @grant        none
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    // Función principal para activar PiP
+    async function activateNativePiP() {
+        const video = document.querySelector('video');
+        
+        if (!video) {
+            console.log("NatiTube: No se encontró ningún vídeo.");
+            return;
+        }
+
+        try {
+            if (document.pictureInPictureEnabled && !video.disablePictureInPicture) {
+                // Intento con la API estándar de Chrome/Android
+                await video.requestPictureInPicture();
+            } else if (video.webkitSupportsPresentationMode && typeof video.webkitSetPresentationMode === "function") {
+                // Soporte para navegadores basados en WebKit
+                video.webkitSetPresentationMode("picture-in-picture");
+            } else {
+                // Fallback: Pantalla completa (en muchos Android esto dispara el PiP al salir al home)
+                video.requestFullscreen();
+            }
+        } catch (error) {
+            console.error("NatiTube Error:", error);
+        }
+    }
+
+    // Crear el botón flotante (UI)
+    const pipBtn = document.createElement('button');
+    pipBtn.innerHTML = '🔳';
+    pipBtn.setAttribute('style', `
+        position: fixed;
+        bottom: 100px;
+        right: 20px;
+        z-index: 999999;
+        width: 50px;
+        height: 50px;
+        background-color: #FF0000;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        font-size: 22px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-tap-highlight-color: transparent;
+    `);
+
+    // Evento de clic
+    pipBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        activateNativePiP();
+    });
+
+    // Inyectar el botón cuando la página esté lista
+    document.body.appendChild(pipBtn);
+
+})();
