@@ -1,18 +1,7 @@
-
-
-
-//PLS READ ME
-
-//THIS VERSION IS CORRUOTED PLS WAIT THE NEW VERSION
-
-
-
-
 // ==UserScript==
-// @name         NatiTube - Force Native Player
-// @namespace    http://tampermonkey.net/
-// @version      5.0
-// @description  Forces the native system player by targeting the video source directly.
+// @name         NatiTube - Space Layer Edition (Blob Fix)
+// @version      6.1
+// @description  Moves YouTube player to space and bridges the stream to the native top layer.
 // @author       3lprox
 // @match        https://m.youtube.com/*
 // @grant        none
@@ -22,36 +11,69 @@
 (function() {
     'use strict';
 
-    // --- CONFIG ---
-    const CHECK_INTERVAL = 1000; // Checking every second for the source
+    // 1. Create the Native Overlay
+    const nativeLayer = document.createElement('video');
+    nativeLayer.controls = true;
+    nativeLayer.autoplay = true;
+    nativeLayer.id = "nati-layer-top";
+    nativeLayer.setAttribute('style', `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: black;
+        z-index: 2147483647; 
+        display: none;
+    `);
+    document.documentElement.appendChild(nativeLayer);
 
-    // --- CORE LOGIC: THE HUNTER ---
-    const forceNativePlayer = () => {
-        const video = document.querySelector('video');
+    const bridgeStream = () => {
+        const ytPlayer = document.querySelector('.html5-video-player');
+        const ytVideo = document.querySelector('video:not(#nati-layer-top)');
 
-        // We check if the video has a source (blob or direct link)
-        if (video && video.src && video.src !== "" && !video.getAttribute('data-nati-fired')) {
-            
-            console.log("NatiTube: Source found! Launching native player...");
-            
-            // Mark as fired to avoid infinite reload loops
-            video.setAttribute('data-nati-fired', 'true');
+        if (ytPlayer) {
+            // Send YouTube's player to space
+            ytPlayer.style.setProperty('position', 'fixed', 'important');
+            ytPlayer.style.setProperty('top', '-9999px', 'important');
+        }
 
-            // FORCE REDIRECT: This is what triggers the system player (Android/iOS)
-            // It sends the video source directly to the browser's URL handler
-            window.location.href = video.src;
-            
-            // Safety measure: Stop the web player
-            video.pause();
+        if (ytVideo && ytVideo.src) {
+            nativeLayer.style.display = 'block';
+
+            // BLOB BRIDGE: If src is a blob, we must capture the stream
+            if (ytVideo.src.startsWith('blob:') && !nativeLayer.getAttribute('data-bridged')) {
+                try {
+                    // We capture the stream from the YouTube video and pass it to our layer
+                    const stream = ytVideo.captureStream ? ytVideo.captureStream() : ytVideo.mozCaptureStream();
+                    nativeLayer.srcObject = stream;
+                    nativeLayer.setAttribute('data-bridged', 'true');
+                    
+                    // Keep original video playing in the dark to feed the stream
+                    ytVideo.play();
+                } catch (e) {
+                    // Fallback for direct sources
+                    if (nativeLayer.src !== ytVideo.src) {
+                        nativeLayer.src = ytVideo.src;
+                    }
+                }
+            }
         }
     };
 
-    // --- ETERNAL LOOP ---
-    // It stays at the top of the YouTube web, waiting for the file to appear
+    // Check every 1000ms
     setInterval(() => {
         if (window.location.pathname === '/watch') {
-            forceNativePlayer();
+            bridgeStream();
+        } else {
+            nativeLayer.style.display = 'none';
+            if (nativeLayer.srcObject) {
+                nativeLayer.srcObject.getTracks().forEach(track => track.stop());
+                nativeLayer.srcObject = null;
+            }
+            nativeLayer.src = "";
+            nativeLayer.removeAttribute('data-bridged');
         }
-    }, CHECK_INTERVAL);
+    }, 1000);
 
 })();
