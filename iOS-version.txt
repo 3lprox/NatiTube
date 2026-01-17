@@ -1,1 +1,36 @@
 https://www.icloud.com/shortcuts/d8875f28f0204c5791db3aef110764fa
+
+// --- CORE LOGIC: NATITUBE FOR IOS ---
+const videoElement = document.querySelector('video');
+
+if (videoElement && videoElement.src) {
+    // Inyectamos los plugins antes de saltar al reproductor
+    
+    // [Plugin 1] Background Play (iOS logic)
+    // Intentamos forzar que el elemento no se pause al perder el foco
+    videoElement.addEventListener('pause', (e) => {
+        if (document.visibilityState === 'hidden') {
+            videoElement.play();
+        }
+    }, true);
+
+    // [Plugin 2] Auto-Lite Mode (iOS optimized)
+    const selectors = ['#comments', '#related', 'ytm-item-section-renderer', '.ad-slot-renderer'];
+    selectors.forEach(s => {
+        const el = document.querySelector(s);
+        if (el) el.style.display = 'none';
+    });
+
+    // --- USER PLUGINS AREA ---
+    /* [PASTE ADDITIONAL PLUGINS HERE] */
+    // -------------------------
+
+    // Acción principal: Abrir en el reproductor nativo de iOS
+    window.location.href = videoElement.src;
+
+} else {
+    alert("No video found. Make sure the video has started loading.");
+}
+
+// Finalizar el Atajo
+completion();
