@@ -1,78 +1,83 @@
 // ==UserScript==
-// @name         NatiTube
-// @version      2.1
-// @description  Opens YouTube videos in the native system player and enhances the web experience.
+// @name         NatiTube Android - Native PiP & Player
+// @namespace    http://tampermonkey.net/
+// @version      2.0
+// @description  Force native Picture-in-Picture and enhance the mobile YouTube experience.
 // @author       3lprox
-// @match        *://*.youtube.com/*
+// @match        https://m.youtube.com/*
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=youtube.com
 // @grant        none
-// @run-at       document-end
 // ==/UserScript==
 
 (function() {
     'use strict';
 
-    // --- CORE LOGIC: ROBUST NATIVE LAUNCHER ---
-    // This function waits for the video metadata to ensure the source (blob/url) is ready.
-    const openInNativePlayer = () => {
-        const videoElement = document.querySelector('video');
+    // --- CORE LOGIC: NATIVE PiP ---
+    async function activateNativePiP() {
+        const video = document.querySelector('video');
         
-        if (videoElement && !videoElement.getAttribute('data-natitube-active')) {
-            const launch = () => {
-                if (videoElement.src && videoElement.src !== "") {
-                    videoElement.setAttribute('data-natitube-active', 'true');
-                    
-                    // Stop the web player to save bandwidth
-                    videoElement.pause();
-                    
-                    // Trigger the native system player
-                    window.location.href = videoElement.src;
-                }
-            };
+        if (!video) {
+            console.log("NatiTube: No video found.");
+            return;
+        }
 
-            // If metadata is already loaded, launch immediately. 
-            // Otherwise, wait for the 'loadedmetadata' event.
-            if (videoElement.readyState >= 1) {
-                launch();
+        try {
+            if (document.pictureInPictureEnabled && !video.disablePictureInPicture) {
+                await video.requestPictureInPicture();
+            } else if (video.webkitSupportsPresentationMode && typeof video.webkitSetPresentationMode === "function") {
+                video.webkitSetPresentationMode("picture-in-picture");
             } else {
-                videoElement.addEventListener('loadedmetadata', launch, { once: true });
+                video.requestFullscreen();
             }
+        } catch (error) {
+            console.error("NatiTube Error:", error);
         }
-    };
+    }
 
-    // Monitor for video changes (Single Page Application navigation)
-    const observer = new MutationObserver(() => {
-        if (window.location.pathname === '/watch') {
-            openInNativePlayer();
-        }
+    // --- UI: FLOATING BUTTON ---
+    const pipBtn = document.createElement('button');
+    pipBtn.textContent = 'PiP'; // Text instead of emoji for GitHub standards
+    pipBtn.setAttribute('style', `
+        position: fixed;
+        bottom: 100px;
+        right: 20px;
+        z-index: 999999;
+        width: 50px;
+        height: 50px;
+        background-color: #FF0000;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-tap-highlight-color: transparent;
+    `);
+
+    pipBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        activateNativePiP();
     });
 
-    observer.observe(document.body, { childList: true, subtree: true });
-
-    // Initial check in case the page loads directly on a video
-    if (window.location.pathname === '/watch') {
-        openInNativePlayer();
-    }
+    document.body.appendChild(pipBtn);
 
     // ========================================================
     // NATITUBE PLUGINS AREA
-    // Feel free to add or remove snippets below.
     // ========================================================
 
     // [Plugin 1] Background Play Enabler
-    // Keeps audio playing when switching tabs or locking the screen.
     Object.defineProperty(document, 'visibilityState', { get: () => 'visible', configurable: true });
     Object.defineProperty(document, 'hidden', { get: () => false, configurable: true });
     window.addEventListener('visibilitychange', (e) => { e.stopImmediatePropagation(); }, true);
 
     // [Plugin 2] Auto-Lite Mode
-    // Removes heavy UI elements like comments and related grids for faster loading.
     const cleanNatiUI = () => {
-        const selectors = [
-            '#comments', 
-            '#related', 
-            'ytm-item-section-renderer[section-identifier="comment-item-section"]',
-            'ytm-rich-section-renderer'
-        ];
+        const selectors = ['#comments', '#related', 'ytm-item-section-renderer[section-identifier="comment-item-section"]'];
         selectors.forEach(s => {
             const el = document.querySelector(s);
             if (el) el.style.display = 'none';
