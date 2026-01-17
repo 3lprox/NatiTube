@@ -1,4 +1,4 @@
-https://www.icloud.com/shortcuts/d8875f28f0204c5791db3aef110764fa
+https://www.icloud.com/shortcuts/ecc6467aeec0416794c07fec8544ac07
 
 // --- CORE LOGIC: NATITUBE FOR IOS ---
 const videoElement = document.querySelector('video');
