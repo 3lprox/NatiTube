@@ -1,0 +1,7 @@
+## Contribute Plugins
+
+You can contribute to NatiTube by sending your own features.
+To submit a plugin:
+1. Create a New Issue or a Pull Request.
+2. Use the tag [Plugin] followed by the description and code.
+3. Your code will be reviewed and added to the "Plugins" section of the main script.
