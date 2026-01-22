@@ -1,6 +1,6 @@
 // ==UserScript==
-// @name         NatiTube - Space Layer V2
-// @version      7.0
+// @name         NatiTube - Space Layer V2 (Fixed)
+// @version      7.1
 // @description  Native layer for video with background audio sync and UI access.
 // @author       3lprox
 // @match        https://m.youtube.com/*
@@ -8,70 +8,103 @@
 // @run-at       document-start
 // ==/UserScript==
 
-(function() {
+(function () {
     'use strict';
 
-    // 1. Create the Native Overlay
-    const nativeLayer = document.createElement('video');
-    nativeLayer.controls = true;
-    nativeLayer.autoplay = true;
-    nativeLayer.muted = true; // Native layer is muted to use YouTube's original audio
-    nativeLayer.id = "nati-layer-top";
-    nativeLayer.setAttribute('style', `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 56.25vw; /* 16:9 Aspect Ratio */
-        background: black;
-        z-index: 2147483647; 
-        display: none;
-    `);
-    document.documentElement.appendChild(nativeLayer);
+    let nativeLayer;
+    let bridgedVideo = null;
 
-    const bridgeStream = () => {
-        const ytPlayer = document.querySelector('.html5-video-player');
-        const ytVideo = document.querySelector('video:not(#nati-layer-top)');
+    function createNativeLayer() {
+        if (nativeLayer) return;
 
-        // If we are on a video page
-        if (window.location.pathname === '/watch') {
-            
-            if (ytVideo && ytVideo.src) {
-                nativeLayer.style.display = 'block';
+        nativeLayer = document.createElement('video');
+        nativeLayer.id = 'nati-layer-top';
+        nativeLayer.controls = true;
+        nativeLayer.autoplay = true;
+        nativeLayer.muted = true; // usamos el audio original de YouTube
+        nativeLayer.playsInline = true;
 
-                // Stream Bridge
-                if (!nativeLayer.getAttribute('data-bridged')) {
-                    try {
-                        const stream = ytVideo.captureStream ? ytVideo.captureStream() : ytVideo.mozCaptureStream();
-                        nativeLayer.srcObject = stream;
-                        nativeLayer.setAttribute('data-bridged', 'true');
-                    } catch (e) {
-                        console.error("NatiTube Bridge Error:", e);
-                    }
-                }
+        nativeLayer.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 56.25vw;
+            background: black;
+            z-index: 2147483647;
+            display: none;
+        `;
 
-                // Ensure synchronization
-                if (ytVideo.paused) nativeLayer.pause();
-                else nativeLayer.play();
-            }
+        document.documentElement.appendChild(nativeLayer);
+    }
 
-            // Space Mode for the YT UI (Pushing it down to leave space for comments)
-            if (ytPlayer) {
-                ytPlayer.style.setProperty('visibility', 'hidden', 'important');
-                // We keep the UI accessible below the native player
-                document.body.style.marginTop = '56.25vw';
-            }
+    function getYTVideo() {
+        return document.querySelector('video.html5-main-video');
+    }
 
-        } else {
-            // Reset when not watching a video
-            nativeLayer.style.display = 'none';
-            nativeLayer.srcObject = null;
-            nativeLayer.removeAttribute('data-bridged');
-            document.body.style.marginTop = '0';
+    function bridgeStream() {
+        if (location.pathname !== '/watch') {
+            reset();
+            return;
         }
-    };
 
-    // Constant Sync Loop
-    setInterval(bridgeStream, 1000);
+        createNativeLayer();
+
+        const ytVideo = getYTVideo();
+        if (!ytVideo || !ytVideo.src) return;
+
+        nativeLayer.style.display = 'block';
+        document.body.style.marginTop = '56.25vw';
+
+        // Crear stream solo una vez
+        if (bridgedVideo !== ytVideo) {
+            try {
+                const stream = ytVideo.captureStream
+                    ? ytVideo.captureStream()
+                    : ytVideo.mozCaptureStream();
+
+                nativeLayer.srcObject = stream;
+                bridgedVideo = ytVideo;
+            } catch (e) {
+                console.error('NatiTube stream error:', e);
+            }
+        }
+
+        // Sincronización
+        if (Math.abs(nativeLayer.currentTime - ytVideo.currentTime) > 0.3) {
+            nativeLayer.currentTime = ytVideo.currentTime;
+        }
+
+        nativeLayer.playbackRate = ytVideo.playbackRate;
+
+        if (ytVideo.paused && !nativeLayer.paused) {
+            nativeLayer.pause();
+        } else if (!ytVideo.paused && nativeLayer.paused) {
+            nativeLayer.play().catch(() => {});
+        }
+
+        // Ocultar player original pero dejar la UI funcional
+        const ytPlayer = document.querySelector('.html5-video-player');
+        if (ytPlayer) {
+            ytPlayer.style.visibility = 'hidden';
+        }
+    }
+
+    function reset() {
+        if (!nativeLayer) return;
+
+        nativeLayer.style.display = 'none';
+        nativeLayer.srcObject = null;
+        bridgedVideo = null;
+        document.body.style.marginTop = '0';
+
+        const ytPlayer = document.querySelector('.html5-video-player');
+        if (ytPlayer) {
+            ytPlayer.style.visibility = '';
+        }
+    }
+
+    // Loop ligero de sincronización
+    setInterval(bridgeStream, 800);
 
 })();
